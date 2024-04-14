@@ -1,0 +1,17 @@
+version: "v3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      ENVIRONMENT: "local"
+    volumes:
+      - .:/app
+    depends_on:
+      - redis-server
+  redis-server:
+    build:
+      dockerfile: redis.Dockerfile
