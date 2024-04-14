@@ -24,7 +24,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_BEANSTALK_SECRET_KEY }}
           aws-region: "us-east-1"
       - name: Upload package to S3 bucket
-        run: aws s3 cp deploy_package.zip s3://elasticbeanstalk-us-east-1-179253752050/app
+        run: aws s3 cp deploy_package.zip s3://elasticbeanstalk-us-east-1-179253752050/
 
       - name: Create new ElasticBeanstalk Application Version
         run: |
