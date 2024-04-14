@@ -30,7 +30,7 @@ jobs:
         run: |
           aws elasticbeanstalk create-application-version \
           --application-name getting-started-app-golang \
-          --source-bundle S3Bucket="elasticbeanstalk-us-east-1-179253752050/app",S3Key="deploy_package.zip" \
+          --source-bundle S3Bucket="elasticbeanstalk-us-east-1-179253752050",S3Key="deploy_package.zip" \
           --version-label "ver-${{ github.sha }}" \
           --description "commit-sha-${{ github.sha }}"
 
