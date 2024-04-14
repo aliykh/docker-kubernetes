@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5001:5001"
+      - "80:5001"
     environment:
       ENVIRONMENT: "local"
     volumes:

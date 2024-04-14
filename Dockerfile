@@ -25,7 +25,7 @@ RUN go mod download && go mod verify
 COPY . .
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /bin/app app/cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o /bin/app ./cmd
 
 ############################
 # STEP 2 build a small image
