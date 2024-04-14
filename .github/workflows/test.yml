@@ -1,9 +1,6 @@
 name: Lint and unit test
 run-name: "${{ github.actor }} is running ${{ github.workflow }} on ${{ github.repository }}"
 on:
-  push:
-    branches:
-      - master
   pull_request:
     paths:
       - "**/*.go"
