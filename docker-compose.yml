@@ -12,6 +12,6 @@ services:
       - .:/app
     depends_on:
       - redis-server
-#  redis-server:
-#    build:
-#      dockerfile: redis.Dockerfile
+  redis-server:
+    build:
+      dockerfile: redis.Dockerfile
