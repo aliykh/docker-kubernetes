@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: dev.Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5001:5001"
     environment:
@@ -12,6 +12,6 @@ services:
       - .:/app
     depends_on:
       - redis-server
-  redis-server:
-    build:
-      dockerfile: redis.Dockerfile
+#  redis-server:
+#    build:
+#      dockerfile: redis.Dockerfile
