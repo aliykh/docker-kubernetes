@@ -3,13 +3,13 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     ports:
       - "80:5001"
     volumes:
       - .:/app
-    depends_on:
-      - redis-server
+#    depends_on:
+#      - redis-server
 #  redis-server:
 #    build:
 #      dockerfile: redis.Dockerfile
