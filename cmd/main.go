@@ -41,7 +41,7 @@ func main() {
 		return redisC.Ping()
 	}, 5, time.Second*3, redis.RetryRedis)
 	if err != nil {
-		log.Fatalf("failed to connect to redis: %s", err)
+		log.Printf("failed to connect to redis: %s", err)
 	}
 
 	mux := http.NewServeMux()

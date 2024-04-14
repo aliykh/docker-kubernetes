@@ -1,0 +1,43 @@
+name: deploy
+run-name: "aws beanstalk deploy"
+on:
+  push:
+    branches:
+      - master
+#    paths: # This is commented out because we want to deploy the entire application | Uncomment this if you want to deploy only a specific path like in monorepo
+
+env:
+  AWS_REGION: ${{ variables.AWS_REGION }}
+  AWS_BEANSTALK_ACCESS_KEY: ${{ secrets.AWS_BEANSTALK_ACCESS_KEY }}
+  AWS_BEANSTALK_SECRET_KEY: ${{ secrets.AWS_BEANSTALK_SECRET_KEY }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create ZIP deployment package
+        run: zip -r deploy_package.zip ./
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ AWS_BEANSTALK_ACCESS_KEY }}
+          aws-secret-access-key: ${{ AWS_BEANSTALK_SECRET_KEY }}
+          aws-region: ${{ AWS_REGION }}
+      - name: Upload package to S3 bucket
+        run: aws s3 cp deploy_package.zip s3://elasticbeanstalk-us-east-1-179253752050/app
+
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name getting-started-app-golang \
+          --source-bundle S3Bucket="elasticbeanstalk-us-east-1-179253752050/app",S3Key="deploy_package.zip" \
+          --version-label "ver-${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+
+
