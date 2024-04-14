@@ -6,11 +6,6 @@ on:
       - master
 #    paths: # This is commented out because we want to deploy the entire application | Uncomment this if you want to deploy only a specific path like in monorepo
 
-env:
-  AWS_REGION: "us-east-1"
-  AWS_BEANSTALK_ACCESS_KEY: ${{ secrets.AWS_BEANSTALK_ACCESS_KEY }}
-  AWS_BEANSTALK_SECRET_KEY: ${{ secrets.AWS_BEANSTALK_SECRET_KEY }}
-
 jobs:
   deploy:
     name: Deploy
@@ -25,8 +20,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: $AWS_BEANSTALK_ACCESS_KEY
-          aws-secret-access-key: "$AWS_BEANSTALK_SECRET_KEY"
+          aws-access-key-id: ${{ secrets.AWS_BEANSTALK_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_BEANSTALK_SECRET_KEY }}
           aws-region: "us-east-1"
       - name: Upload package to S3 bucket
         run: aws s3 cp deploy_package.zip s3://elasticbeanstalk-us-east-1-179253752050/app
