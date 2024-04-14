@@ -6,12 +6,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:5001"
-    environment:
-      ENVIRONMENT: "local"
     volumes:
       - .:/app
     depends_on:
       - redis-server
-  redis-server:
-    build:
-      dockerfile: redis.Dockerfile
+#  redis-server:
+#    build:
+#      dockerfile: redis.Dockerfile
