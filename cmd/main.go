@@ -1,9 +1,6 @@
 package main
 
 import (
-	"app/pkg/helpers"
-	"app/pkg/redis"
-	"app/pkg/server"
 	"context"
 	"encoding/json"
 	"log"
@@ -11,6 +8,10 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/aliykh/docker-kubernetes/pkg/helpers"
+	"github.com/aliykh/docker-kubernetes/pkg/redis"
+	"github.com/aliykh/docker-kubernetes/pkg/server"
 )
 
 type AppConfig struct {
