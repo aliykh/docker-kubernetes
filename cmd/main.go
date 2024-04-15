@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +26,7 @@ func init() {
 	appCfg = AppConfig{
 		srv: &server.Config{
 			Name: "main-server",
-			Port: 5001,
+			Port: 80,
 		},
 		redis: &redis.Config{
 			Host:     "redis-server:6379",
@@ -45,7 +46,6 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health-check", HealthCheck)
 	mux.HandleFunc("GET /hello-world", HelloWorldHandler)
 	mux.HandleFunc("GET /redis-ping", func(w http.ResponseWriter, r *http.Request) {
 		err = redisC.Ping()
@@ -69,6 +69,16 @@ func main() {
 		return
 	}
 
+	healthChecker := server.NewServer(&server.Config{
+		Name: "health-checker",
+		Port: 8080,
+	}, http.HandlerFunc(HealthCheckHandler))
+
+	if err := healthChecker.Start(); err != nil {
+		log.Fatal(err)
+		return
+	}
+
 	log.Printf("Server [%s] started on port: [%d]\n", appCfg.srv.Name, appCfg.srv.Port)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -84,10 +94,17 @@ func main() {
 
 	<-ctx.Done()
 	if err := srv.Stop(); err != nil {
-		log.Fatal(err)
+		log.Printf("Error on shutdown http: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	if err := healthChecker.Stop(); err != nil {
+		log.Printf("Error on shutdown health checker: %s\n", err.Error())
+		os.Exit(1)
 	}
 
 	log.Println("shutdown successfully")
+	os.Exit(0)
 }
 
 func WriteJsonResponse(w http.ResponseWriter, out any) {
@@ -103,6 +120,10 @@ func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func HealthCheck(w http.ResponseWriter, r *http.Request) {
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
+	if _, err := io.WriteString(w, "{ \"success\": true }"); err != nil {
+		log.Printf("io.WriteString failed: %s", err)
+	}
 }

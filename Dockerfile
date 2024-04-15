@@ -36,7 +36,7 @@ FROM ${DISTROLESS_IMAGE}
 
 # Copy our static executable
 COPY --from=builder /bin/app /bin/app
-EXPOSE 5001
+EXPOSE 8080 80
 # Run the hello binary.
 ENTRYPOINT ["/bin/app"]
 

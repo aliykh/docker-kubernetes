@@ -29,13 +29,13 @@ jobs:
       - name: Create new ElasticBeanstalk Application Version
         run: |
           aws elasticbeanstalk create-application-version \
-          --application-name getting-started-app-golang \
+          --application-name golang-test-api \
           --source-bundle S3Bucket="elasticbeanstalk-us-east-1-179253752050",S3Key="deploy_package.zip" \
           --version-label "ver-${{ github.sha }}" \
           --description "commit-sha-${{ github.sha }}"
 
       - name: Deploy new ElasticBeanstalk Application Version
-        run: aws elasticbeanstalk update-environment --environment-name Getting-started-app-golang-env --version-label "ver-${{ github.sha }}"
+        run: aws elasticbeanstalk update-environment --environment-name Golang-test-api-env --version-label "ver-${{ github.sha }}"
 
 
 
