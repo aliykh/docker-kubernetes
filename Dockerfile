@@ -1,9 +1,7 @@
-ARG  BUILDER_IMAGE=golang:1.22-alpine
-ARG DISTROLESS_IMAGE=gcr.io/distroless/static
 ############################
 # STEP 1 build executable binary
 ############################
-FROM ${BUILDER_IMAGE} as builder
+FROM golang:1.22-alpine as builder
 
 # Ensure ca-certficates are up to date
 RUN update-ca-certificates
@@ -32,7 +30,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -a -installsuffix cgo -o 
 ############################
 # using base nonroot image
 # user:group is nobody:nobody, uid:gid = 65534:65534
-FROM ${DISTROLESS_IMAGE}
+FROM gcr.io/distroless/static
 
 # Copy our static executable
 COPY --from=builder /bin/app /bin/app
