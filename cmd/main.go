@@ -23,17 +23,38 @@ type AppConfig struct {
 var appCfg AppConfig
 
 func init() {
-	appCfg = AppConfig{
-		srv: &server.Config{
-			Name: "main-server",
-			Port: 80,
-		},
-		redis: &redis.Config{
-			Host:     "redis-server:6379",
-			Password: "",
-			DB:       0,
-		},
+
+	currenvEnv := os.Getenv("ENVIRONMENT")
+	if currenvEnv == "" {
+		currenvEnv = "local"
 	}
+	switch currenvEnv {
+	case "local":
+		appCfg = AppConfig{
+			srv: &server.Config{
+				Name: "main-server",
+				Port: 5001,
+			},
+			redis: &redis.Config{
+				Host:     "redis-server:6379",
+				Password: "",
+				DB:       0,
+			},
+		}
+	case "production":
+		appCfg = AppConfig{
+			srv: &server.Config{
+				Name: "main-server",
+				Port: 80,
+			},
+			redis: &redis.Config{
+				Host:     "redis-server:6379",
+				Password: "",
+				DB:       0,
+			},
+		}
+	}
+
 }
 
 func main() {

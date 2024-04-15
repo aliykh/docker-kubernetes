@@ -1,0 +1,17 @@
+version: "v3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      ENVIRONMENT: "production"
+    volumes:
+      - .:/app
+#    depends_on:
+#      - redis-server
+#  redis-server:
+#    build:
+#      dockerfile: redis.Dockerfile
