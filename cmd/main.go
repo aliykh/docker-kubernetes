@@ -67,7 +67,8 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /hello-world", HelloWorldHandler)
+	mux.HandleFunc("GET /hello-world", customHandler("Hello World!"))
+	mux.HandleFunc("GET /new", customHandler("New World!"))
 	mux.HandleFunc("GET /redis-ping", func(w http.ResponseWriter, r *http.Request) {
 		err = redisC.Ping()
 		if err != nil {
@@ -135,10 +136,12 @@ func WriteJsonResponse(w http.ResponseWriter, out any) {
 	}
 }
 
-func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	WriteJsonResponse(w, map[string]string{
-		"message": "Hello World!",
-	})
+func customHandler(msg string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		WriteJsonResponse(w, map[string]string{
+			"message": msg,
+		})
+	}
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
