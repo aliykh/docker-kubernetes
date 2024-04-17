@@ -11,9 +11,6 @@ RUN apk add make
 # Set the working directory to the root of your Go module
 WORKDIR /myapp
 
-# Add cache for faster builds
-ENV GOCACHE=$HOME/.cache/go-build
-RUN --mount=type=cache,target=$GOCACHE
 
 # use modules
 COPY go.mod .
