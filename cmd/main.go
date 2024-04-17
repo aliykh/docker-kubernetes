@@ -40,7 +40,7 @@ func main() {
 	redisC := redis.NewClient(appCfg.redis)
 	err := helpers.Retry(func(attempt int, lastRetryCause string) error {
 		return redisC.Ping()
-	}, 5, time.Second*3, redis.RetryRedis)
+	}, 2, time.Second*3, redis.RetryRedis)
 	if err != nil {
 		log.Printf("failed to connect to redis: %s", err)
 	}
@@ -70,6 +70,8 @@ func main() {
 		return
 	}
 
+	log.Printf("Server [%s] started on port: [%d]\n", appCfg.srv.Name, appCfg.srv.Port)
+
 	healthChecker := server.NewServer(&server.Config{
 		Name: "health-checker",
 		Port: 8080,
@@ -80,7 +82,7 @@ func main() {
 		return
 	}
 
-	log.Printf("Server [%s] started on port: [%d]\n", appCfg.srv.Name, appCfg.srv.Port)
+	log.Printf("Server [%s] started on port: [%d]\n", "Health check", 8080)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
