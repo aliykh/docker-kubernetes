@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/aliykh/docker-kubernetes/pkg/runtime"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
+	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"io"
 	"log"
 	"net/http"
@@ -44,11 +46,20 @@ func init() {
 func main() {
 
 	err := ffclient.Init(ffclient.Config{
-		Environment:     helpers.GetEnv(),
+		Environment:     "production",
 		Logger:          log.New(os.Stdout, "", log.LstdFlags),
 		PollingInterval: 10 * time.Second,
-		Retriever: &fileretriever.Retriever{
-			Path: "features/feature.yaml",
+		Retrievers: []retriever.Retriever{
+			&fileretriever.Retriever{
+				Path: "features/feature.yaml",
+			},
+			&githubretriever.Retriever{
+				RepositorySlug: "aliykh/docker-kubernetes",
+				Branch:         "project/features",
+				FilePath:       "features/remote_feature.yaml",
+				GithubToken:    "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",
+				Timeout:        5 * time.Second,
+			},
 		},
 		Context: context.Background(),
 	})
@@ -66,7 +77,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /some-feature", customHandler("feature"))
+	mux.HandleFunc("POST /some-feature", customHandler("local-feature-flag"))
+	mux.HandleFunc("POST /remote-some-feature", customHandler("remote-feature-flag"))
 
 	mux.HandleFunc("GET /redis-ping", func(w http.ResponseWriter, r *http.Request) {
 		err = redisC.Ping()
@@ -137,11 +149,12 @@ func WriteJsonResponse(w http.ResponseWriter, out any) {
 	}
 }
 
-func customHandler(msg string) http.HandlerFunc {
+func customHandler(feature string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user1 := ffcontext.NewEvaluationContext(fmt.Sprintf("%x", time.Now().Nanosecond()))
-		testFlag, err := ffclient.BoolVariation("local-feature-flag", user1, false)
+		testFlag, err := ffclient.BoolVariation(feature, user1, false)
 		runtime.Require(err, "Variation failed. please call init on ffclient")
+		var msg string
 		if testFlag {
 			msg = "new feature"
 		} else {

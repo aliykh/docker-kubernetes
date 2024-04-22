@@ -11,7 +11,7 @@ local-feature-flag:
         my-old-feature: 60
     - name: Target local env
       query: env eq "local"
-      variation: my-new-feature # always true -> ignores defaultRule
+      variation: my-new-feature # always new feature enabled [true] -> ignores defaultRule
   defaultRule:
     percentage:
       my-new-feature: 20
