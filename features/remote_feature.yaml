@@ -7,8 +7,8 @@ remote-feature-flag:
     - name: Target prod env
       query: env eq "production"
       percentage:
-        my-new-feature: 50
-        my-old-feature: 50
+        my-new-feature: 0
+        my-old-feature: 100
     - name: Target local env
       query: env eq "local"
       variation: my-old-feature # always true -> ignores defaultRule
