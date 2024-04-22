@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/aliykh/docker-kubernetes/pkg/runtime"
+	"github.com/thomaspoignant/go-feature-flag/ffcontext"
+	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +17,7 @@ import (
 	"github.com/aliykh/docker-kubernetes/pkg/helpers"
 	"github.com/aliykh/docker-kubernetes/pkg/redis"
 	"github.com/aliykh/docker-kubernetes/pkg/server"
+	ffclient "github.com/thomaspoignant/go-feature-flag"
 )
 
 type AppConfig struct {
@@ -37,8 +42,22 @@ func init() {
 }
 
 func main() {
+
+	err := ffclient.Init(ffclient.Config{
+		Environment:     helpers.GetEnv(),
+		Logger:          log.New(os.Stdout, "", log.LstdFlags),
+		PollingInterval: 10 * time.Second,
+		Retriever: &fileretriever.Retriever{
+			Path: "features/feature.yaml",
+		},
+		Context: context.Background(),
+	})
+	runtime.Require(err, "ffclient")
+
+	defer ffclient.Close()
+
 	redisC := redis.NewClient(appCfg.redis)
-	err := helpers.Retry(func(attempt int, lastRetryCause string) error {
+	err = helpers.Retry(func(attempt int, lastRetryCause string) error {
 		return redisC.Ping()
 	}, 2, time.Second*3, redis.RetryRedis)
 	if err != nil {
@@ -46,8 +65,9 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /hello-world", customHandler("Hello World!"))
-	mux.HandleFunc("GET /new", customHandler("New World!"))
+
+	mux.HandleFunc("POST /some-feature", customHandler("feature"))
+
 	mux.HandleFunc("GET /redis-ping", func(w http.ResponseWriter, r *http.Request) {
 		err = redisC.Ping()
 		if err != nil {
@@ -119,6 +139,15 @@ func WriteJsonResponse(w http.ResponseWriter, out any) {
 
 func customHandler(msg string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		user1 := ffcontext.NewEvaluationContext(fmt.Sprintf("%x", time.Now().Nanosecond()))
+		testFlag, err := ffclient.BoolVariation("local-feature-flag", user1, false)
+		runtime.Require(err, "Variation failed. please call init on ffclient")
+		if testFlag {
+			msg = "new feature"
+		} else {
+			msg = "old feature"
+		}
+
 		WriteJsonResponse(w, map[string]string{
 			"message": msg,
 		})

@@ -43,7 +43,7 @@ func (sv *Server) Start() error {
 	}
 
 	go func() {
-		if err := sv.server.Serve(listener); err != http.ErrServerClosed {
+		if err := sv.server.Serve(listener); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Serve: %v", err)
 		}
 	}()
