@@ -1,5 +1,5 @@
 # 20% of the users will use the variation "my-new-feature"
-local-feature-flag:
+remote-feature-flag:
   variations:
     my-new-feature: true
     my-old-feature: false
@@ -7,11 +7,11 @@ local-feature-flag:
     - name: Target prod env
       query: env eq "production"
       percentage:
-        my-new-feature: 40
-        my-old-feature: 60
+        my-new-feature: 90
+        my-old-feature: 10
     - name: Target local env
       query: env eq "local"
-      variation: my-new-feature # always true -> ignores defaultRule
+      variation: my-old-feature # always true -> ignores defaultRule
   defaultRule:
     percentage:
       my-new-feature: 20
