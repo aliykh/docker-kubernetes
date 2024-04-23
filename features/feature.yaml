@@ -1,5 +1,6 @@
 # 20% of the users will use the variation "my-new-feature"
 local-feature-flag:
+  trackEvents: true
   variations:
     my-new-feature: true
     my-old-feature: false

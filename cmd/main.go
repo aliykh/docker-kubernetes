@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aliykh/docker-kubernetes/pkg/runtime"
+	"github.com/thomaspoignant/go-feature-flag/exporter/fileexporter"
 	"github.com/thomaspoignant/go-feature-flag/ffcontext"
 	"github.com/thomaspoignant/go-feature-flag/retriever"
 	"github.com/thomaspoignant/go-feature-flag/retriever/fileretriever"
-	"github.com/thomaspoignant/go-feature-flag/retriever/githubretriever"
 	"io"
 	"log"
 	"net/http"
@@ -46,22 +46,32 @@ func init() {
 func main() {
 
 	err := ffclient.Init(ffclient.Config{
-		Environment:     "production",
-		Logger:          log.New(os.Stdout, "", log.LstdFlags),
 		PollingInterval: 10 * time.Second,
+		Logger:          log.New(os.Stdout, "", log.LstdFlags),
+		Context:         context.Background(),
+		Environment:     "production",
 		Retrievers: []retriever.Retriever{
 			&fileretriever.Retriever{
 				Path: "features/feature.yaml",
 			},
-			&githubretriever.Retriever{
-				RepositorySlug: "aliykh/docker-kubernetes",
-				Branch:         "project/features",
-				FilePath:       "features/remote_feature.yaml",
-				GithubToken:    "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",
-				Timeout:        5 * time.Second,
+			//	&githubretriever.Retriever{
+			//	RepositorySlug: "aliykh/docker-kubernetes",
+			//	Branch:         "project/features",
+			//	FilePath:       "features/remote_feature.yaml",
+			//	GithubToken:    "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",
+			//	Timeout:        5 * time.Second,
+			//	},
+		},
+		DataExporter: ffclient.DataExporter{
+			FlushInterval:    10 * time.Second,
+			MaxEventInMemory: 1000,
+			Exporter: &fileexporter.Exporter{
+				OutputDir:   "tmp/",
+				Format:      "csv",
+				Filename:    "flag-variation-{{ .Hostname}}-{{ .Timestamp}}.{{ .Format}}",
+				CsvTemplate: "{{ .Kind}};{{ .ContextKind}};{{ .UserKey}};{{ .CreationDate}};{{ .Key}};{{ .Variation}};{{ .Value}};{{ .Default}};{{ .Source}}\n",
 			},
 		},
-		Context: context.Background(),
 	})
 	runtime.Require(err, "ffclient")
 
